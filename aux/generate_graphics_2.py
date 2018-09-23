@@ -4,7 +4,7 @@ from features_ECG import *
 import os
 import csv
 import gc
-import cPickle as pickle
+import pickle as pickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +17,7 @@ from sklearn import decomposition
 from sklearn.decomposition import PCA, IncrementalPCA
 
 from features_ECG import *
+import settings
 
 
 # DS: contains the patient list for load
@@ -44,7 +45,7 @@ patients = []
 
 size_RR_max = 20
 
-pathDB = '/home/mondejar/dataset/ECG/'
+pathDB = settings.db_path
 DB_name = 'mitdb'
 fs = 360
 jump_lines = 1
@@ -53,7 +54,7 @@ jump_lines = 1
 fRecords = list()
 fAnnotations = list()
 
-lst = os.listdir(pathDB + DB_name + "/csv")
+lst = os.listdir(pathDB)
 lst.sort()
 for file in lst:
     if file.endswith(".csv"):
@@ -77,12 +78,12 @@ r_index = 0
 #for r, a in zip(fRecords, fAnnotations):
 #for r in range(0, len(fRecords)):
 r = 4
-print("Processing signal " + str(r) + " / " + str(len(fRecords)) + "...")
+print(("Processing signal " + str(r) + " / " + str(len(fRecords)) + "..."))
 
 # 1. Read signalR_poses
-filename = pathDB + DB_name + "/csv/" + fRecords[r]
-print filename
-f = open(filename, 'rb')
+filename = pathDB + fRecords[r]
+print(filename)
+f = open(filename, 'r')
 reader = csv.reader(f, delimiter=',')
 next(reader) # skip first line!
 MLII_index = 1
@@ -103,9 +104,9 @@ RAW_signals.append((MLII, V1)) ## NOTE a copy must be created in order to preser
 # display_signal(MLII)
 
 # 2. Read annotations
-filename = pathDB + DB_name + "/csv/" + fAnnotations[r]
-print filename
-f = open(filename, 'rb')
+filename = pathDB + fAnnotations[r]
+print(filename)
+f = open(filename, 'r')
 next(f) # skip first line!
 
 annotations = []
@@ -188,6 +189,6 @@ for pose in R_poses[r]:
 
 #plt.show()
 
-plt.savefig('/home/mondejar/graphic_2.pdf', dpi=None, facecolor='w', edgecolor='w',
+plt.savefig('{0}graphic_2.pdf'.format(settings.result_path), dpi=None, facecolor='w', edgecolor='w',
     orientation='landscape', papertype='a4', format='pdf', transparent=True, bbox_inches=None, 
     pad_inches=0.1, frameon=None)

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 run_SVM.py
     

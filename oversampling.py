@@ -11,7 +11,7 @@ Mondejar Guerra, Victor M.
 import os
 import csv
 import gc
-import cPickle as pickle
+import pickle as pickle
 import time
 from imblearn.over_sampling import SMOTE, ADASYN
 from imblearn.combine import SMOTEENN, SMOTETomek
@@ -31,7 +31,7 @@ def perform_oversampling(oversamp_method, db_path, oversamp_features_name, tr_fe
     print(oversamp_features_pickle_name)
 
     if True:
-        print("Oversampling method:\t" + oversamp_method + " ...")
+        print(("Oversampling method:\t" + oversamp_method + " ..."))
         # 1 SMOTE
         if oversamp_method == 'SMOTE':  
             #kind={'borderline1', 'borderline2', 'svm'}
@@ -64,7 +64,7 @@ def perform_oversampling(oversamp_method, db_path, oversamp_features_name, tr_fe
  
         tr_features_balanced, tr_labels_balanced  = oversamp.fit_sample(tr_features, tr_labels)
         # TODO Write data oversampled!
-        print("Writing oversampled data at: " + oversamp_features_pickle_name + " ...")
+        print(("Writing oversampled data at: " + oversamp_features_pickle_name + " ..."))
         np.savetxt('mit_db/' + oversamp_features_name + '_DS1_labels.csv', tr_labels_balanced.astype(int), '%.0f') 
         f = open(oversamp_features_pickle_name, 'wb')
         pickle.dump(tr_features_balanced, f, 2)
@@ -75,6 +75,6 @@ def perform_oversampling(oversamp_method, db_path, oversamp_features_name, tr_fe
     count = collections.Counter(tr_labels_balanced)
     print("Oversampling balance")
     print(count)
-    print("Time required: " + str(format(end - start, '.2f')) + " sec" )
+    print(("Time required: " + str(format(end - start, '.2f')) + " sec" ))
 
     return tr_features_balanced, tr_labels_balanced 

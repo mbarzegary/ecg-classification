@@ -23,6 +23,7 @@ from sklearn import svm
 from sklearn import decomposition
 
 import os
+import settings
 
 def create_svm_model_name(model_svm_path, winL, winR, do_preprocess, 
     maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, 
@@ -121,7 +122,7 @@ def eval_model(svm_model, features, labels, multi_mode, voting_strategy, output_
         np.savetxt(output_path + '/' + DS + 'C_' + str(C_value) + 
             '_predict_' + voting_strategy + '.csv', predict_ovr.astype(int), '%.0f') 
 
-    print("Results writed at " + output_path + '/' + DS + 'C_' + str(C_value))
+    print(("Results writed at " + output_path + '/' + DS + 'C_' + str(C_value)))
 
 
 
@@ -158,7 +159,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
     maxRR=True, use_RR=True, norm_RR=True, compute_morph={''}, oversamp_method = '', pca_k = '', feature_selection = '', do_cross_val = '', C_value = 0.001, gamma_value = 0.0, reduced_DS = False, leads_flag = [1,0]):
     print("Runing train_SVM.py!")
 
-    db_path = '/home/mondejar/dataset/ECG/mitdb/m_learning/scikit/'
+    db_path = settings.db_path
     
     # Load train data 
     [tr_features, tr_labels, tr_patient_num_beats] = load_mit_db('DS1', winL, winR, do_preprocess,
@@ -182,12 +183,12 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
     # before oversamp!!?????
 
     # TODO perform normalization before the oversampling?
-    if oversamp_method:
-        # Filename
-        oversamp_features_pickle_name = create_oversamp_name(reduced_DS, do_preprocess, compute_morph, winL, winR, maxRR, use_RR, norm_RR, pca_k)
+    # if oversamp_method:
+    #     # Filename
+    #     oversamp_features_pickle_name = create_oversamp_name(reduced_DS, do_preprocess, compute_morph, winL, winR, maxRR, use_RR, norm_RR, pca_k)
 
-        # Do oversampling
-        tr_features, tr_labels = perform_oversampling(oversamp_method, db_path + 'oversamp/python_mit', oversamp_features_pickle_name, tr_features, tr_labels)
+    #     # Do oversampling
+    #     tr_features, tr_labels = perform_oversampling(oversamp_method, db_path + 'oversamp/python_mit', oversamp_features_pickle_name, tr_features, tr_labels)
 
     # Normalization of the input data
     # scaled: zero mean unit variance ( z-score )
@@ -213,7 +214,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         # NOTE 11 Enero: TEST WITH IPCA!!!!!!
         start = time.time()
         
-        print("Runing IPCA " + str(pca_k) + "...")
+        print(("Runing IPCA " + str(pca_k) + "..."))
 
         # Run PCA
         IPCA = sklearn.decomposition.IncrementalPCA(pca_k, batch_size=pca_k) # gamma_pca
@@ -236,7 +237,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         """
         end = time.time()
 
-        print("Time runing IPCA (rbf): " + str(format(end - start, '.2f')) + " sec" )
+        print(("Time runing IPCA (rbf): " + str(format(end - start, '.2f')) + " sec" ))
     ##############################################################
     # 2) Cross-validation: 
 
@@ -245,7 +246,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         start = time.time()
 
         # TODO Save data over the k-folds and ranked by the best average values in separated files   
-        perf_measures_path = create_svm_model_name('/home/mondejar/Dropbox/ECG/code/ecg_classification/python/results/' + multi_mode, winL, winR, do_preprocess, 
+        perf_measures_path = create_svm_model_name(settings.result_path + multi_mode, winL, winR, do_preprocess, 
         maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, oversamp_method, leads_flag, reduced_DS,  pca_k, '/')
 
         # TODO implement this method! check to avoid NaN scores....
@@ -262,7 +263,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
             for k in k_folds:
                 ijk_scores, c_values = run_cross_val(tr_features_scaled, tr_labels, tr_patient_num_beats, do_cross_val, k)
                 # TODO Save data over the k-folds and ranked by the best average values in separated files   
-                perf_measures_path = create_svm_model_name('/home/mondejar/Dropbox/ECG/code/ecg_classification/python/results/' + multi_mode, winL, winR, do_preprocess, 
+                perf_measures_path = create_svm_model_name(settings.result_path + multi_mode, winL, winR, do_preprocess, 
                 maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, oversamp_method, leads_flag, reduced_DS,  pca_k, '/')
 
                 if not os.path.exists(perf_measures_path):
@@ -270,7 +271,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
                 np.savetxt(perf_measures_path + '/cross_val_k-' + str(k) + '_Ijk_score.csv', (c_values, ijk_scores.astype(float)), "%f") 
             
             end = time.time()
-            print("Time runing Cross Validation: " + str(format(end - start, '.2f')) + " sec" )
+            print(("Time runing Cross Validation: " + str(format(end - start, '.2f')) + " sec" ))
     else:
 
         ################################################################################################
@@ -291,18 +292,18 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         else:
             model_svm_path = model_svm_path + '_C_' +  str(C_value) + '.joblib.pkl'
 
-        print("Training model on MIT-BIH DS1: " + model_svm_path + "...")
+        print(("Training model on MIT-BIH DS1: " + model_svm_path + "..."))
 
         if os.path.isfile(model_svm_path):
             # Load the trained model!
             svm_model = joblib.load(model_svm_path)
 
         else:
-            class_weights = {}
-            for c in range(4):
-                class_weights.update({c:len(tr_labels) / float(np.count_nonzero(tr_labels == c))})
+            # class_weights = {}
+            # for c in range(4):
+            #     class_weights.update({c:len(tr_labels) / float(np.count_nonzero(tr_labels == c))})
 
-            #class_weight='balanced', 
+            class_weights='balanced'
             if gamma_value != 0.0: # NOTE 0.0 means 1/n_features default value
                 svm_model = svm.SVC(C=C_value, kernel='rbf', degree=3, gamma=gamma_value,  
                     coef0=0.0, shrinking=True, probability=use_probability, tol=0.001, 
@@ -321,8 +322,8 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
             end = time.time()
             # TODO assert that the class_ID appears with the desired order, 
             # with the goal of ovo make the combinations properly
-            print("Trained completed!\n\t" + model_svm_path + "\n \
-                \tTime required: " + str(format(end - start, '.2f')) + " sec" )
+            print(("Trained completed!\n\t" + model_svm_path + "\n \
+                \tTime required: " + str(format(end - start, '.2f')) + " sec" ))
 
             # Export model: save/write trained SVM model
             joblib.dump(svm_model, model_svm_path)
@@ -331,14 +332,14 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         
         #########################################################################
         # 4) Test SVM model
-        print("Testing model on MIT-BIH DS2: " + model_svm_path + "...")
+        print(("Testing model on MIT-BIH DS2: " + model_svm_path + "..."))
 
         ############################################################################################################
         # EVALUATION
         ############################################################################################################
 
         # Evaluate the model on the training data
-        perf_measures_path = create_svm_model_name('/home/mondejar/Dropbox/ECG/code/ecg_classification/python/results/' + multi_mode, winL, winR, do_preprocess, 
+        perf_measures_path = create_svm_model_name(settings.result_path + multi_mode, winL, winR, do_preprocess, 
             maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, oversamp_method, leads_flag, reduced_DS, pca_k, '/')
 
         # ovo_voting:

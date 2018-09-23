@@ -13,6 +13,7 @@ Mondejar Guerra, Victor M.
 
 from sklearn import metrics
 import numpy as np
+import settings
 
 class performance_measures:
     def __init__(self, n):
@@ -186,7 +187,7 @@ def compute_AAMI_performance_measures(conf_mat):
     return pf_ms
 
 
-results_path = '/home/mondejar/Dropbox/ECG/code/ecg_classification/python/results/ovo/MLII/'
+results_path = '{0}ovo/MLII/'.format(settings.result_path)
 
 # Our single SVM
 #conf_mat = np.array([[39446, 2404, 340, 1843], [443, 1374, 186, 47], [28, 162, 3005, 25], [240, 2, 35, 111]])

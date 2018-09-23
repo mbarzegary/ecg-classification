@@ -20,15 +20,15 @@ def compute_cohen_kappa(confusion_matrix):
 
     kappa = (prob_observed - prob_expected) / (1 - prob_expected)
 
-    print("Kappa: " + str(kappa) + " Po: " + str(prob_observed) + " Pe: " + str(prob_expected) + "\nPe_a: " + str(prob_expectedA) + "\nPe_b: " + str(prob_expectedB) )
-    print("Mean acc = " + str(np.sum(mean_acc) / 4.) + " m_acc = " + str(mean_acc))
+    print(("Kappa: " + str(kappa) + " Po: " + str(prob_observed) + " Pe: " + str(prob_expected) + "\nPe_a: " + str(prob_expectedA) + "\nPe_b: " + str(prob_expectedB) ))
+    print(("Mean acc = " + str(np.sum(mean_acc) / 4.) + " m_acc = " + str(mean_acc)))
 
     print("Kappa / Acc")
-    print(str(kappa / prob_observed))
+    print((str(kappa / prob_observed)))
 
 
     print("Linear relationship y = mx + w:\t prob_observed * (1./0.75)  + (0.25/0.75)")
-    print( str( (prob_observed * (1./0.75) +  (-0.25/0.75) )))
+    print(( str( (prob_observed * (1./0.75) +  (-0.25/0.75) ))))
 
     return kappa, prob_observed, prob_expected
 

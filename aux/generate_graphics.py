@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from load_MITBIH import *
+import settings
 
 # Generate graphics for paper
 
-db_path = '/home/mondejar/dataset/ECG/mitdb/m_learning/scikit/'
+db_path = settings.db_path
 winL = 90
 winR = 90
 do_preprocess = True
@@ -209,7 +210,7 @@ leg.get_frame().set_alpha(0.5)
 
 #plt.show()
 
-plt.savefig('/home/mondejar/graphic.pdf', dpi=None, facecolor='w', edgecolor='w',
+plt.savefig('{0}graphic.pdf'.format(settings.result_path), dpi=None, facecolor='w', edgecolor='w',
     orientation='portrait', papertype='a4', format='pdf', transparent=True, bbox_inches=None, 
     pad_inches=0.1, frameon=None)
 

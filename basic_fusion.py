@@ -9,6 +9,7 @@ Mondejar Guerra, Victor M.
 """
 
 from train_SVM import *
+import settings
 
 # Compute the basic rule from the list of probs 
 # selected by rule index:
@@ -77,14 +78,14 @@ def basic_rules(probs_ensemble, rule_index):
 
 def main():
     DS = 'DS2'
-    print("Runing basic_fusion.py!" + DS)
+    print(("Runing basic_fusion.py!" + DS))
 
     oversamp = '' #'', 'SMOTEENN/', 'SMOTE/', 'SMOTETomek/', 'ADASYN/'
     # Load gt labelso
-    eval_labels = np.loadtxt('/home/mondejar/Dropbox/ECG/code/ecg_classification/python/mit_db/' + DS + '_labels.csv') 
+    eval_labels = np.loadtxt(settings.fusion_path + DS + '_labels.csv') 
 
     # Configuration
-    results_path = '/home/mondejar/Dropbox/ECG/code/ecg_classification/python/results/ovo/MLII/'
+    results_path = '{0}ovo/MLII/'.format(settings.result_path)
 
     if DS == 'DS2':     
         model_RR            = results_path + oversamp + 'rm_bsln/' + 'maxRR/' + 'RR/' + 'norm_RR/'   + 'weighted/' + 'C_0.001' + '_decision_ovo.csv'

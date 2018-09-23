@@ -128,7 +128,7 @@ def compute_hos_descriptor(beat, n_intervals, lag):
     hos_b = np.zeros(( (n_intervals-1) * 2))
     for i in range(0, n_intervals-1):
         pose = (lag * (i+1))
-        interval = beat[(pose -(lag/2) ):(pose + (lag/2))]
+        interval = beat[(pose -(lag//2) ):(pose + (lag//2))]
         
         # Skewness  
         hos_b[i] = scipy.stats.skew(interval, 0, True)
@@ -157,10 +157,10 @@ def compute_Uniform_LBP(signal, neigh=8):
     # NOTE: Reduce sampling by half
     #signal_avg = scipy.signal.resample(signal, len(signal) / avg_win_size)
 
-    for i in range(neigh/2, len(signal) - neigh/2):
+    for i in range(neigh//2, len(signal) - neigh//2):
         pattern = np.zeros(neigh)
         ind = 0
-        for n in range(-neigh/2,0) + range(1,neigh/2+1):
+        for n in list(range(-neigh//2,0)) + list(range(1,neigh//2+1)):
             if signal[i] > signal[i+n]:
                 pattern[ind] = 1          
             ind += 1
@@ -187,10 +187,10 @@ def compute_LBP(signal, neigh=4):
     #signal_avg = average_signal(signal, avg_win_size)
     signal_avg = scipy.signal.resample(signal, len(signal) / avg_win_size)
 
-    for i in range(neigh/2, len(signal) - neigh/2):
+    for i in range(neigh//2, len(signal) - neigh//2):
         pattern = np.zeros(neigh)
         ind = 0
-        for n in range(-neigh/2,0) + range(1,neigh/2+1):
+        for n in list(range(-neigh//2,0)) + list(range(1,neigh//2+1)):
             if signal[i] > signal[i+n]:
                 pattern[ind] = 1          
             ind += 1
@@ -209,9 +209,9 @@ def compute_LBP(signal, neigh=4):
 def compute_HBF(beat):
 
     coeffs_hbf = np.zeros(15, dtype=float)
-    coeffs_HBF_3 = hermfit(range(0,len(beat)), beat, 3) # 3, 4, 5, 6?
-    coeffs_HBF_4 = hermfit(range(0,len(beat)), beat, 4)
-    coeffs_HBF_5 = hermfit(range(0,len(beat)), beat, 5)
+    coeffs_HBF_3 = hermfit(list(range(0,len(beat))), beat, 3) # 3, 4, 5, 6?
+    coeffs_HBF_4 = hermfit(list(range(0,len(beat))), beat, 4)
+    coeffs_HBF_5 = hermfit(list(range(0,len(beat))), beat, 5)
     #coeffs_HBF_6 = hermfit(range(0,len(beat)), beat, 6)
 
     coeffs_hbf = np.concatenate((coeffs_HBF_3, coeffs_HBF_4, coeffs_HBF_5))

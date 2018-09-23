@@ -64,6 +64,6 @@ def run_feature_selection(features, labels, feature_selection, best_features):
 
         features_selected = features[:, features_index_sorted[0:best_features]]
 
-    print("Selected only " + str(features_selected.shape) + " features ")
+    print(("Selected only " + str(features_selected.shape) + " features "))
 
     return features_selected, features_index_sorted

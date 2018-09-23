@@ -31,7 +31,7 @@ pca_k = 0
 
 for oversamp_method in oversamp_methods:
 
-    print("run_full_crossval.py: SVM ((RR) train with oversamp " + oversamp_method)
+    print(("run_full_crossval.py: SVM ((RR) train with oversamp " + oversamp_method))
 
     use_RR = False
     norm_RR = False

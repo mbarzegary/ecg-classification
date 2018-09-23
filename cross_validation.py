@@ -138,7 +138,7 @@ def run_cross_val(features, labels, patient_num_beats, division_mode, k):
 
             # NOTE we could use the F-measure average from each class??
 
-            print("C value (" + str(c_svm) + " Cross val k " + str(kk) +  "/" + str(k) + "  AVG(F-measure) = " + str( cv_scores[index_cv] / float(kk+1))) 
+            print(("C value (" + str(c_svm) + " Cross val k " + str(kk) +  "/" + str(k) + "  AVG(F-measure) = " + str( cv_scores[index_cv] / float(kk+1)))) 
         # range k
         # beat division
         

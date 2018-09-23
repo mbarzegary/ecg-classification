@@ -14,7 +14,8 @@ Mondejar Guerra, Victor M.
 import os
 import csv
 import gc
-import cPickle as pickle
+import pickle as pickle
+import hickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,6 +30,8 @@ from sklearn.decomposition import PCA, IncrementalPCA
 from features_ECG import *
 
 from numpy.polynomial.hermite import hermfit, hermval
+
+import settings
 
 
 
@@ -90,7 +93,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
     features_labels_name = create_features_labels_name(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_morph, db_path, reduced_DS, leads_flag) 
 
     if os.path.isfile(features_labels_name):
-        print("Loading pickle: " + features_labels_name + "...")
+        print(("Loading pickle: " + features_labels_name + "..."))
         f = open(features_labels_name, 'rb')
         # disable garbage collector       
         gc.disable()# this improve the required loading time!
@@ -100,7 +103,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
 
 
     else:
-        print("Loading MIT BIH arr (" + DS + ") ...")
+        print(("Loading MIT BIH arr (" + DS + ") ..."))
 
         # ML-II
         if reduced_DS == False:
@@ -128,6 +131,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
             # disable garbage collector       
             gc.disable()# this improve the required loading time!
             my_db = pickle.load(f)
+            #my_db = hickle.load(mit_pickle_name)
             gc.enable()
             f.close()
         else: # Load data and compute de RR features 
@@ -136,14 +140,16 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
             else:
                 my_db = load_signal(DS2, winL, winR, do_preprocess)
 
-            print("Saving signal processed data ...")
+            print("Saving processed signal data ...")
             # Save data
             # Protocol version 0 itr_features_balanceds the original ASCII protocol and is backwards compatible with earlier versions of Python.
             # Protocol version 1 is the old binary format which is also compatible with earlier versions of Python.
             # Protocol version 2 was introduced in Python 2.3. It provides much more efficient pickling of new-style classes.
+            
             f = open(mit_pickle_name, 'wb')
             pickle.dump(my_db, f, 2)
             f.close
+            # hickle.dump(my_db, mit_pickle_name, mode="w")
 
         
         features = np.array([], dtype=float)
@@ -199,7 +205,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
 
         #########################################################################################
         # Compute morphological features
-        print("Computing morphological features (" + DS + ") ...")
+        print(("Computing morphological features (" + DS + ") ..."))
 
         num_leads = np.sum(leads_flag)
 
@@ -225,7 +231,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
             features = np.column_stack((features, f_raw))  if features.size else f_raw
 
             end = time.time()
-            print("Time resample: " + str(format(end - start, '.2f')) + " sec" )
+            print(("Time resample: " + str(format(end - start, '.2f')) + " sec" ))
 
         if 'raw' in compute_morph:
             print("Raw ...")
@@ -247,7 +253,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
             features = np.column_stack((features, f_raw))  if features.size else f_raw
 
             end = time.time()
-            print("Time raw: " + str(format(end - start, '.2f')) + " sec" )
+            print(("Time raw: " + str(format(end - start, '.2f')) + " sec" ))
         # LBP 1D
         # 1D-local binary pattern based feature extraction for classification of epileptic EEG signals: 2014, unas 55 citas, Q2-Q1 Matematicas
         # https://ac.els-cdn.com/S0096300314008285/1-s2.0-S0096300314008285-main.pdf?_tid=8a8433a6-e57f-11e7-98ec-00000aab0f6c&acdnat=1513772341_eb5d4d26addb6c0b71ded4fd6cc23ed5
@@ -282,7 +288,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
                     f_lbp = np.vstack((f_lbp, f_lbp_lead))
 
             features = np.column_stack((features, f_lbp))  if features.size else f_lbp
-            print(features.shape)
+            print((features.shape))
 
         if 'lbp' in compute_morph:
             print("lbp ...")
@@ -302,7 +308,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
                     f_lbp = np.vstack((f_lbp, f_lbp_lead))
 
             features = np.column_stack((features, f_lbp))  if features.size else f_lbp
-            print(features.shape)
+            print((features.shape))
 
 
         if 'hbf5' in compute_morph:
@@ -323,7 +329,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
                     f_hbf = np.vstack((f_hbf, f_hbf_lead))
 
             features = np.column_stack((features, f_hbf))  if features.size else f_hbf
-            print(features.shape)
+            print((features.shape))
 
         # Wavelets
         if 'wvlt' in compute_morph:
@@ -349,7 +355,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
         # Wavelets
         if 'wvlt+pca' in compute_morph:
             pca_k = 7
-            print("Wavelets + PCA ("+ str(pca_k) + "...")
+            print(("Wavelets + PCA ("+ str(pca_k) + "..."))
             
             family = 'db1'
             level = 3
@@ -405,7 +411,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
                     #f_HOS = np.vstack((f_HOS, compute_hos_descriptor(b, n_intervals, lag)))
 
             features = np.column_stack((features, f_HOS))  if features.size else f_HOS
-            print(features.shape)
+            print((features.shape))
 
         # My morphological descriptor
         if 'myMorph' in compute_morph:
@@ -430,7 +436,7 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
         print("labels")
 
         # Set labels array!
-        print('writing pickle: ' +  features_labels_name + '...')
+        print(('writing pickle: ' +  features_labels_name + '...'))
         f = open(features_labels_name, 'wb')
         pickle.dump([features, labels, patient_num_beats], f, 2)
         f.close
@@ -460,8 +466,8 @@ def load_signal(DS, winL, winR, do_preprocess):
 
     size_RR_max = 20
 
-    pathDB = '/home/mondejar/dataset/ECG/'
-    DB_name = 'mitdb'
+    pathDB = settings.db_path
+    #DB_name = 'mitdb'
     fs = 360
     jump_lines = 1
 
@@ -469,7 +475,7 @@ def load_signal(DS, winL, winR, do_preprocess):
     fRecords = list()
     fAnnotations = list()
 
-    lst = os.listdir(pathDB + DB_name + "/csv")
+    lst = os.listdir(pathDB)
     lst.sort()
     for file in lst:
         if file.endswith(".csv"):
@@ -493,12 +499,12 @@ def load_signal(DS, winL, winR, do_preprocess):
     #for r, a in zip(fRecords, fAnnotations):
     for r in range(0, len(fRecords)):
 
-        print("Processing signal " + str(r) + " / " + str(len(fRecords)) + "...")
+        print(("Processing signal " + str(r+1) + " / " + str(len(fRecords)) + "..."))
 
         # 1. Read signalR_poses
-        filename = pathDB + DB_name + "/csv/" + fRecords[r]
-        print filename
-        f = open(filename, 'rb')
+        filename = pathDB + fRecords[r]
+        print(filename)
+        f = open(filename, 'r')
         reader = csv.reader(f, delimiter=',')
         next(reader) # skip first line!
         MLII_index = 1
@@ -519,9 +525,9 @@ def load_signal(DS, winL, winR, do_preprocess):
         # display_signal(MLII)
 
         # 2. Read annotations
-        filename = pathDB + DB_name + "/csv/" + fAnnotations[r]
-        print filename
-        f = open(filename, 'rb')
+        filename = pathDB + fAnnotations[r]
+        print(filename)
+        f = open(filename, 'r')
         next(f) # skip first line!
 
         annotations = []
