@@ -146,9 +146,9 @@ def load_mit_db(DS, winL, winR, do_preprocess, maxRR, use_RR, norm_RR, compute_m
             # Protocol version 1 is the old binary format which is also compatible with earlier versions of Python.
             # Protocol version 2 was introduced in Python 2.3. It provides much more efficient pickling of new-style classes.
             
-            f = open(mit_pickle_name, 'wb')
-            pickle.dump(my_db, f, 2)
-            f.close
+            # f = open(mit_pickle_name, 'wb')
+            # pickle.dump(my_db, f, 2)
+            # f.close
             # hickle.dump(my_db, mit_pickle_name, mode="w")
 
         
