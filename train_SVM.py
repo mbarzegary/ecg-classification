@@ -19,11 +19,16 @@ import sklearn
 from sklearn.externals import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
+from sklearn.neural_network import MLPClassifier
 
 from sklearn import decomposition
 
 import os
 import settings
+
+import matplotlib.pyplot as plt
+import matplotlib
+
 
 def create_svm_model_name(model_svm_path, winL, winR, do_preprocess, 
     maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, 
@@ -71,7 +76,8 @@ def create_svm_model_name(model_svm_path, winL, winR, do_preprocess,
 # Eval the SVM model and export the results
 def eval_model(svm_model, features, labels, multi_mode, voting_strategy, output_path, C_value, gamma_value, DS):
     if multi_mode == 'ovo':
-        decision_ovo        = svm_model.decision_function(features)
+        # decision_ovo        = svm_model.decision_function(features)
+        decision_ovo        = svm_model.predict_proba(features)[:, 1]
         
         if voting_strategy == 'ovo_voting':
             predict_ovo, counter    = ovo_voting(decision_ovo, 4)
@@ -241,6 +247,14 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
     ##############################################################
     # 2) Cross-validation: 
 
+    # import pandas as pd
+    # import statsmodels.api as sm
+    # d = pd.DataFrame(tr_features, 
+    #     columns = ['pre_R', 'post_R', 'local_R', 'global_R', 'morph1', 'morph2', 'morph3', 'morph4'])
+    # corr = d.corr()
+    # sm.graphics.plot_corr(corr, xnames=list(corr.columns))
+    # plt.show()
+
     if do_cross_val:
         print("Runing cross val...")
         start = time.time()
@@ -281,7 +295,8 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         
         use_probability = False
 
-        model_svm_path = db_path + 'svm_models/' + multi_mode + '_rbf'
+        # model_svm_path = db_path + 'svm_models/' + multi_mode + '_rbf'
+        model_svm_path = db_path + 'mlp_models/' + multi_mode + '_rbf'
 
         model_svm_path = create_svm_model_name(model_svm_path, winL, winR, do_preprocess,
             maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection,
@@ -294,7 +309,7 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
 
         print(("Training model on MIT-BIH DS1: " + model_svm_path + "..."))
 
-        if os.path.isfile(model_svm_path):
+        if 1==2:#os.path.isfile(model_svm_path):
             # Load the trained model!
             svm_model = joblib.load(model_svm_path)
 
@@ -314,6 +329,12 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
                     coef0=0.0, shrinking=True, probability=use_probability, tol=0.001, 
                     cache_size=200, class_weight=class_weights, verbose=False, 
                     max_iter=-1, decision_function_shape=multi_mode, random_state=None)
+            
+            # svm_model = MLPClassifier(hidden_layer_sizes=(2, ), activation='relu', solver='adam', alpha=0.0001,\
+            #              batch_size='auto', learning_rate='constant', learning_rate_init=0.001, power_t=0.5,\
+            #              max_iter=200, shuffle=True, random_state=None, tol=0.0001, verbose=True, warm_start=False,\
+            #              momentum=0.9, nesterovs_momentum=True, early_stopping=False, validation_fraction=0.1,\
+            #              beta_1=0.9, beta_2=0.999, epsilon=1e-08)
             
             # Let's Train!
 
@@ -338,25 +359,73 @@ def main(multi_mode='ovo', winL=90, winR=90, do_preprocess=True, use_weight_clas
         # EVALUATION
         ############################################################################################################
 
-        # Evaluate the model on the training data
-        perf_measures_path = create_svm_model_name(settings.result_path + multi_mode, winL, winR, do_preprocess, 
-            maxRR, use_RR, norm_RR, compute_morph, use_weight_class, feature_selection, oversamp_method, leads_flag, reduced_DS, pca_k, '/')
+        # Evaluate the model with new data
+        predictions = svm_model.predict(eval_features_scaled)
+        from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+        print(confusion_matrix(eval_labels,predictions))
+        print(classification_report(eval_labels,predictions))
+        print("Accuracy: {0}".format(accuracy_score(eval_labels,predictions)))
 
-        # ovo_voting:
-        # Simply add 1 to the win class
-        print("Evaluation on DS1 ...")
-        eval_model(svm_model, tr_features_scaled, tr_labels, multi_mode, 'ovo_voting', perf_measures_path, C_value, gamma_value, 'Train_')
+        # print("Soft max:")
 
-        # Let's test new data!
-        print("Evaluation on DS2 ...")   
-        eval_model(svm_model, eval_features_scaled, eval_labels, multi_mode, 'ovo_voting', perf_measures_path, C_value, gamma_value, '')
+        # pred_softmax = svm_model.predict_proba(eval_features_scaled)
+        # print(pred_softmax)
 
+        # comp = np.zeros([predictions.size, 4]) # Columns: correct_0, correct_1, incorrect_0, incorrect_1
+        # for i in range(predictions.size):
+        #     # if eval_labels[i] == 1:
+        #     #     print("i = {0}, label={1}".format(i, eval_labels[i]))
+        #     # if predictions[i] != eval_labels[i]:
+        #     #     print("Prediction:{0}, Actual:{1}, Softmax:{2}".format(predictions[i], eval_labels[i], pred_softmax[i,:]))
+        #     if predictions[i] == eval_labels[i]: # Correct
+        #         if predictions[i] == 0:
+        #             comp[i,0] = pred_softmax[i,0]
+        #         else:
+        #             comp[i,1] = pred_softmax[i,1]
+        #     else: # Incorrect
+        #         if predictions[i] == 0:
+        #             comp[i,2] = pred_softmax[i,0]
+        #         else:
+        #             comp[i,3] = pred_softmax[i,1]
+        
+        # comp[comp == 0] = np.nan
+        # print(np.nanmean(comp, axis=0))
 
-        # ovo_voting_exp:
-        # Consider the post prob adding to both classes
-        print("Evaluation on DS1 ...")
-        eval_model(svm_model, tr_features_scaled, tr_labels, multi_mode, 'ovo_voting_exp', perf_measures_path, C_value, gamma_value, 'Train_')
+        # hist_correct0 = [pred_softmax[i,0] for i in range(predictions.size) if predictions[i] == 0 and predictions[i] == eval_labels[i]]
+        # hist_correct1 = [pred_softmax[i,1] for i in range(predictions.size) if predictions[i] == 1 and predictions[i] == eval_labels[i]]
+        # hist_incorrect0 = [pred_softmax[i,0] for i in range(predictions.size) if predictions[i] == 0 and predictions[i] != eval_labels[i]]
+        # hist_incorrect1 = [pred_softmax[i,1] for i in range(predictions.size) if predictions[i] == 1 and predictions[i] != eval_labels[i]]
 
-        # Let's test new data!
-        print("Evaluation on DS2 ...")   
-        eval_model(svm_model, eval_features_scaled, eval_labels, multi_mode, 'ovo_voting_exp', perf_measures_path, C_value, gamma_value, '')
+        # font = {'weight' : 'bold',
+        #         'size'   : 16}
+
+        # matplotlib.rc('font', **font)
+
+        # plt.hist(hist_correct0, bins=50)
+        # plt.xlabel("Softmax probability")
+        # plt.ylabel("Number of samples")
+        # plt.title("Correctly predicted Normal")
+        # plt.tight_layout()
+        
+        # plt.figure()
+        # plt.hist(hist_correct1, bins=50)
+        # plt.xlabel("Softmax probability")
+        # plt.ylabel("Number of samples")
+        # plt.title("Correctly predicted Abnormal")
+        # plt.tight_layout()
+
+        # plt.figure()
+        # plt.hist(hist_incorrect0, bins=50)
+        # plt.xlabel("Softmax probability")
+        # plt.ylabel("Number of samples")
+        # plt.title("Incorrectly predicted Normal")
+        # plt.tight_layout()
+
+        # plt.figure()
+        # plt.hist(hist_incorrect1, bins=50)
+        # plt.xlabel("Softmax probability")
+        # plt.ylabel("Number of samples")
+        # plt.title("Incorrectly predicted Abnormal")
+        # plt.tight_layout()
+
+        # plt.show()

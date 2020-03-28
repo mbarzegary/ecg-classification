@@ -15,7 +15,6 @@ import os
 import csv
 import gc
 import pickle as pickle
-import hickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -488,10 +487,11 @@ def load_signal(DS, winL, winR, do_preprocess):
     MITBIH_classes = ['N', 'L', 'R', 'e', 'j', 'A', 'a', 'J', 'S', 'V', 'E', 'F']#, 'P', '/', 'f', 'u']
     AAMI_classes = []
     AAMI_classes.append(['N', 'L', 'R'])                    # N
-    AAMI_classes.append(['A', 'a', 'J', 'S', 'e', 'j'])     # SVEB 
-    AAMI_classes.append(['V', 'E'])                         # VEB
-    AAMI_classes.append(['F'])                              # F
-    #AAMI_classes.append(['P', '/', 'f', 'u'])              # Q
+    AAMI_classes.append(['A', 'a', 'J', 'S', 'e', 'j', 'V', 'E', 'F'])     # AbN
+    # AAMI_classes.append(['A', 'a', 'J', 'S', 'e', 'j'])     # SVEB 
+    # AAMI_classes.append(['V', 'E'])                         # VEB
+    # AAMI_classes.append(['F'])                              # F
+    ##AAMI_classes.append(['P', '/', 'f', 'u'])              # Q
 
     RAW_signals = []
     r_index = 0
